@@ -120,7 +120,7 @@ if ( ! $?WM_PRECISION_OPTION ) setenv WM_PRECISION_OPTION DP
 if ( ! $?WM_COMPILE_OPTION ) setenv WM_COMPILE_OPTION Opt
 
 # WM_MPLIB = SYSTEMOPENMPI | OPENMPI | MPICH | MPICH-GM | HPMPI | MPI | QSMPI
-if ( ! $?WM_MPLIB ) setenv WM_MPLIB OPENMPI
+if ( ! $?WM_MPLIB ) setenv WM_MPLIB SYSTEMOPENMPI
 
 
 # Run options (floating-point signal handling and memory initialisation)
