@@ -1,7 +1,9 @@
 #!/bin/sh
+
 #
 # Build optional components (eg, may depend on third-party libraries)
 # -----------------------------------------------------------------------------
+set -e
 cd ${0%/*} || exit 1    # run from this directory
 set -x
 

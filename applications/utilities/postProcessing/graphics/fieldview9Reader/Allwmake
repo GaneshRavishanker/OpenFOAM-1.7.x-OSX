@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -e
+
 # disabled
 
 # if [ "$FV_HOME" -a -r $FV_HOME ]
