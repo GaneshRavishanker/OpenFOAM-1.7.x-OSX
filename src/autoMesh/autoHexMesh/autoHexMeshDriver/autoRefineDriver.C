@@ -268,6 +268,8 @@ Foam::label Foam::autoRefineDriver::surfaceOnlyRefine
 
         const PtrList<featureEdgeMesh> dummyFeatures;
 
+        PtrList<featureEdgeMesh> dummy(0);
+
         labelList candidateCells
         (
             meshRefiner_.refineCandidates
@@ -433,6 +435,8 @@ Foam::label Foam::autoRefineDriver::shellRefine
             << endl;
 
         const PtrList<featureEdgeMesh> dummyFeatures;
+
+        PtrList<featureEdgeMesh> dummy(0);
 
         labelList candidateCells
         (

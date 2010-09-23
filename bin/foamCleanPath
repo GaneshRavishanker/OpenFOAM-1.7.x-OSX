@@ -98,12 +98,15 @@ do
         #- no duplicate dirs
         duplicate=`echo " $dirList " | sed -ne "s@ $dir @DUP@p"`
 
-        if [ ! "$duplicate" ]
-        then
-            dirList="$dirList $dir"
-        fi
+	if [[ ! $dir =~ "OpenFOAM-1.5" ]]
+	    then
+	    if [ ! "$duplicate" ]
+		then
+		dirList="$dirList $dir"
+	    fi
+	fi
     elif [ "$strip" != "true" ]
-    then
+	then
         # Print non-existing directories if not in 'strip' mode.
         dirList="$dirList $dir"
     fi

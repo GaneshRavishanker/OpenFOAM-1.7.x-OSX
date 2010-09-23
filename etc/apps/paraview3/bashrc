@@ -76,7 +76,14 @@ if [ -r $ParaView_DIR -o -r $paraviewInstDir ]
 then
     export PATH=$ParaView_DIR/bin:$PATH
     export LD_LIBRARY_PATH=$ParaView_DIR/lib/paraview-$ParaView_MAJOR:$LD_LIBRARY_PATH
+    export DYLD_LIBRARY_PATH=$ParaView_DIR/lib/paraview-$ParaView_MAJOR:$DYLD_LIBRARY_PATH
     export PV_PLUGIN_PATH=$FOAM_LIBBIN/paraview-$ParaView_MAJOR
+
+    if [ "$WM_ARCH_BASE" == "darwin" ]
+	then
+        export PATH=$ParaView_DIR/bin/paraview.app/Contents/MacOS:$PATH
+	export DYLD_LIBRARY_PATH=$ParaView_DIR/bin:$DYLD_LIBRARY_PATH
+    fi
 
     # add in python libraries if required
     paraviewPython=$ParaView_DIR/Utilities/VTKPythonWrapping
@@ -88,6 +95,10 @@ then
         else
             export PYTHONPATH=$paraviewPython:$ParaView_DIR/lib/paraview-$ParaView_MAJOR
         fi
+	if [ "$WM_ARCH_BASE" == "darwin" ]
+	    then
+	    export PYTHONPATH=$PYTHONPATH:$ParaView_DIR/bin
+	fi
     fi
 else
     unset PV_PLUGIN_PATH
