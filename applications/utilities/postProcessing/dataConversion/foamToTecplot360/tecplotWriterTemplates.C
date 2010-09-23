@@ -25,8 +25,10 @@ License
 
 //extern "C"
 //{
+#define Time X11_Time
     #include "MASTER.h"
     #include "GLOBAL.h"
+#undef Time
 //}
 
 #include "tecplotWriter.H"
