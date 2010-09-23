@@ -1,4 +1,4 @@
-CPP        = cpp-mp-4.5 --traditional-cpp $(GFLAGS)
+CPP        = $(WM_CPP) $(GFLAGS)
 LD         = ld
 
 PROJECT_LIBS = -l$(WM_PROJECT)

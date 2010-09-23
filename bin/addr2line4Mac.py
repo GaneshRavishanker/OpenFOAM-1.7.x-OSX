@@ -1,13 +1,11 @@
-#! /usr/bin/python
+#!/usr/bin/python
 
-import sys
+import sys, re, subprocess
+
 filename=sys.argv[1]
 address=sys.argv[2]
-import re
 
-import subprocess
-
-p = subprocess.Popen("gdb -batch -x /dev/stdin",
+p = subprocess.Popen("/usr/bin/gdb -batch -x /dev/stdin",
                      shell=True,
                      bufsize=0,
                      stdin=subprocess.PIPE,

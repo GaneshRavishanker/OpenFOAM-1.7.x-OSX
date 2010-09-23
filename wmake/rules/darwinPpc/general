@@ -1,4 +1,4 @@
-CPP        = cpp $(WM_CPP_OPTIONS)
+CPP        = $(WM_CPP) $(WM_CPP_OPTIONS)
 LD         = ld
 
 PROJECT_LIBS = -l$(WM_PROJECT)

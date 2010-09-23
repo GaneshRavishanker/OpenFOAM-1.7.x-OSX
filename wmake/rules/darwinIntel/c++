@@ -2,7 +2,7 @@
 
 c++WARN     = -Wall -Wextra -Wno-unused-parameter -Wold-style-cast
 
-CC          = g++-mp-4.3
+CC          = $(WM_CXX)
 
 include $(RULES)/c++$(WM_COMPILE_OPTION)
 
