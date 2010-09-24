@@ -446,6 +446,7 @@ int yywrap()
     {
         /* reset input buffer to the previous buffer on the stack */
         yy_switch_to_buffer(buffers[currentBuffer]);
+        yy_delete_buffer(buffers[currentBuffer]);
 
         /* Return to the normal state for the previous buffer on the stack */
         BEGIN(INITIAL);
