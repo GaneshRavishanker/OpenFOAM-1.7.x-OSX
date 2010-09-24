@@ -1,6 +1,6 @@
 .SUFFIXES: .L
 
-Ltoo = flex -+ -f $$SOURCE ; mv lex.yy.cc $*.C ; $(CC) $(c++FLAGS) -c $*.C -o $@
+Ltoo = flex -+ -f $$SOURCE ; mv lex.yy.cc $*.C ; sed -i '' 's@\#include <FlexLexer.h>@\#include "/usr/include/FlexLexer.h"@' $*.C; $(CC) $(c++FLAGS) -c $*.C -o $@
 
 .L.dep:
 	$(MAKE_DEP)
