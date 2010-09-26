@@ -58,7 +58,10 @@ void Foam::interactionLists::buildCellReferralLists()
 
     List<DynamicList<label> > cellSendingReferralLists(referralProcs.size());
 
-    List<DynamicList<DynamicList<label> > >
+    // Use autoPtr to help GCC compilers (< 4.3) which suffer from core
+    // language defect 391, i.e. require a copy-ctor to be present when passing
+    // a temporary as an rvalue.
+    List<DynamicList<autoPtr<DynamicList<label> > > >
         cellReceivingReferralLists(referralProcs.size());
 
     // Run through all referredCells again building up send and receive info
@@ -69,7 +72,7 @@ void Foam::interactionLists::buildCellReferralLists()
 
         label rPI = findIndex(referralProcs, rC.sourceProc());
 
-        DynamicList<DynamicList<label> >& rRL(cellReceivingReferralLists[rPI]);
+        DynamicList<autoPtr<DynamicList<label> > >& rRL(cellReceivingReferralLists[rPI]);
 
         DynamicList<label>& sRL(cellSendingReferralLists[rPI]);
 
@@ -89,20 +92,20 @@ void Foam::interactionLists::buildCellReferralLists()
 
             rRL.append
             (
-                DynamicList<label> (labelList(1,rIL))
+                autoPtr<DynamicList<label> >(new DynamicList<label> (labelList(1,rIL)))
             );
         }
         else
         {
-            rRL[existingSource].append(rIL);
+            rRL[existingSource]->append(rIL);
 
-            rRL[existingSource].shrink();
+            rRL[existingSource]->shrink();
         }
     }
 
     forAll(referralProcs, rPI)
     {
-        DynamicList<DynamicList<label> >& rRL(cellReceivingReferralLists[rPI]);
+        DynamicList<autoPtr<DynamicList<label> > >& rRL(cellReceivingReferralLists[rPI]);
 
         DynamicList<label>& sRL(cellSendingReferralLists[rPI]);
 
@@ -120,13 +123,13 @@ void Foam::interactionLists::buildCellReferralLists()
 
     forAll(referralProcs, rPI)
     {
-        DynamicList<DynamicList<label> >& rRL(cellReceivingReferralLists[rPI]);
+        DynamicList<autoPtr<DynamicList<label> > >& rRL(cellReceivingReferralLists[rPI]);
 
         labelListList translLL(rRL.size());
 
         forAll(rRL, rRLI)
         {
-            translLL[rRLI] = rRL[rRLI];
+            translLL[rRLI] = rRL[rRLI]();
         }
 
         cellReceivingReferralLists_[rPI] = receivingReferralList

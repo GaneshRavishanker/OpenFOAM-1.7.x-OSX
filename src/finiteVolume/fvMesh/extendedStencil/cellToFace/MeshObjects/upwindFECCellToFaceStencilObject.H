@@ -69,7 +69,7 @@ public:
             MeshObject<fvMesh, upwindFECCellToFaceStencilObject>(mesh),
             extendedUpwindCellToFaceStencil
             (
-                FECCellToFaceStencil(mesh),
+                FECCellToFaceStencil(mesh).by_ref(),
                 pureUpwind,
                 minOpposedness
             )

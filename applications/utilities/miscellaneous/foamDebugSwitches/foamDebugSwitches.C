@@ -53,19 +53,25 @@ int main(int argc, char *argv[])
     {
         dictionary controlDict(IFstream(findEtcFile("controlDict", true))());
 
+        // Work-around for compiler bug
+        wordList dbgTmp = controlDict.subDict("DebugSwitches").toc();
         wordHashSet oldDebug
         (
-            controlDict.subDict("DebugSwitches").toc()
+            static_cast<UList<word>&>(dbgTmp)
         );
 
+        // Work-around for compiler bug
+        wordList infoTmp = controlDict.subDict("InfoSwitches").toc();
         wordHashSet oldInfo
         (
-            controlDict.subDict("InfoSwitches").toc()
+            static_cast<UList<word>&>(infoTmp)
         );
 
+        // Work-around for compiler bug
+        wordList optTmp = controlDict.subDict("OptimisationSwitches").toc();
         wordHashSet oldOpt
         (
-            controlDict.subDict("OptimisationSwitches").toc()
+            static_cast<UList<word>&>(optTmp)
         );
 
 

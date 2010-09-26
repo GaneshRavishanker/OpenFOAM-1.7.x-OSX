@@ -65,7 +65,7 @@ public:
         )
         :
             MeshObject<fvMesh, centredCFCFaceToCellStencilObject>(mesh),
-            extendedCentredFaceToCellStencil(CFCFaceToCellStencil(mesh))
+            extendedCentredFaceToCellStencil(CFCFaceToCellStencil(mesh).by_ref())
         {}
 
 

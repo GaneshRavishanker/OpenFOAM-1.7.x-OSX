@@ -70,10 +70,12 @@ void Foam::enrichedPatch::calcMasterPointFaces() const
             if (mpfIter == mpf.end())
             {
                 // Not found, add new dynamic list
+                // Work-around for compiler bug
+                DynamicList<label> fpp(primitiveMesh::facesPerPoint_);
                 mpf.insert
                 (
                     curFace[pointI],
-                    DynamicList<label>(primitiveMesh::facesPerPoint_)
+                    fpp
                 );
 
                 // Iterator is invalidated - have to find again
@@ -109,10 +111,12 @@ void Foam::enrichedPatch::calcMasterPointFaces() const
             if (mpfIter == mpf.end())
             {
                 // Not found, add new dynamic list
+                // Work-around for compiler bug
+                DynamicList<label> fpp(primitiveMesh::facesPerPoint_);
                 mpf.insert
                 (
                     mergedSmp,
-                    DynamicList<label>(primitiveMesh::facesPerPoint_)
+                    fpp
                 );
 
                 // Iterator is invalidated - have to find again

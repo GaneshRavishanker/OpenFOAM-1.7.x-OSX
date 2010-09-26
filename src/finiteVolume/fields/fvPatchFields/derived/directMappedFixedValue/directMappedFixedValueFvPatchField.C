@@ -267,7 +267,7 @@ void directMappedFixedValueFvPatchField<Type>::updateCoeffs()
                 allValues
             );
 
-            newValues = this->patch().patchSlice(allValues);
+            newValues = static_cast<UList<Type> >(this->patch().patchSlice(allValues));
 
             break;
         }

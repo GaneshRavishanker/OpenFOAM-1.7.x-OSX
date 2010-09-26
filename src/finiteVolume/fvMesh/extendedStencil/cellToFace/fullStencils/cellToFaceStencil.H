@@ -148,6 +148,12 @@ public:
             return globalNumbering_;
         }
 
+        //- Work-around for C++ Standard Core Language Defect 391
+        const cellToFaceStencil& by_ref() const
+        {
+            return *this;
+        }
+
 };
 
 

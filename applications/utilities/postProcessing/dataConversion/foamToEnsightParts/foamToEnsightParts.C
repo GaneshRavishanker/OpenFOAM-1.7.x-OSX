@@ -178,12 +178,16 @@ int main(int argc, char *argv[])
     DynamicList<label> fieldTimesUsed;
 
     // Track the time indices used by each cloud
-    HashTable<DynamicList<label> > cloudTimesUsed;
+    // Use autoPtr to help GCC compilers (< 4.3) which suffer from core
+    // language defect 391, i.e. require a copy-ctor to be present when passing
+    // a temporary as an rvalue.
+    HashTable<autoPtr<DynamicList<label> > > cloudTimesUsed;
 
     // Create a new DynamicList for each cloud
     forAllConstIter(HashTable<HashTable<word> >, cloudFields, cloudIter)
     {
-        cloudTimesUsed.insert(cloudIter.key(), DynamicList<label>());
+        cloudTimesUsed.insert(cloudIter.key(),
+                autoPtr<DynamicList<label> >(new DynamicList<label>()));
     }
 
 
@@ -413,7 +417,7 @@ int main(int argc, char *argv[])
             Info<< " )" << endl;
 
             // remember the time index
-            cloudTimesUsed[cloudName].append(timeIndex);
+            cloudTimesUsed[cloudName]->append(timeIndex);
         }
     }
 

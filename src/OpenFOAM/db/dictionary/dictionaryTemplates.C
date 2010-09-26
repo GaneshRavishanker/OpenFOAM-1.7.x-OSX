@@ -109,5 +109,54 @@ void Foam::dictionary::set(const keyType& k, const T& t)
     set(new primitiveEntry(k, t));
 }
 
+#if __GNUC__ == 4 && __GNUC_MINOR__ < 4
+// gcc < 4.4 doesn't seem to find Switch::operator bool().
+#include "Switch.H"
+namespace Foam {
+template<>
+inline Switch dictionary::lookupOrDefault<Switch>
+(
+    const word& keyword,
+    const Switch& deflt,
+    bool recursive,
+    bool patternMatch
+) const
+{
+    const entry* entryPtr = lookupEntryPtr(keyword, recursive, patternMatch);
+
+    if (entryPtr)
+    {
+        return Switch(entryPtr->stream());
+    }
+    else
+    {
+        return deflt;
+    }
+}
+
+template<>
+inline
+Switch Foam::dictionary::lookupOrAddDefault<Switch>
+(
+    const word& keyword,
+    const Switch& deflt,
+    bool recursive,
+    bool patternMatch
+)
+{
+    const entry* entryPtr = lookupEntryPtr(keyword, recursive, patternMatch);
+
+    if (entryPtr)
+    {
+        return Switch(entryPtr->stream());
+    }
+    else
+    {
+        add(new primitiveEntry(keyword, deflt));
+        return deflt;
+    }
+}
+}
+#endif
 
 // ************************************************************************* //

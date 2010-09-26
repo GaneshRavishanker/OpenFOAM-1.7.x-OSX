@@ -65,7 +65,7 @@ public:
         )
         :
             MeshObject<fvMesh, pureUpwindCFCCellToFaceStencilObject>(mesh),
-            extendedUpwindCellToFaceStencil(CFCCellToFaceStencil(mesh))
+            extendedUpwindCellToFaceStencil(CFCCellToFaceStencil(mesh).by_ref())
         {
             if (extendedCellToFaceStencil::debug)
             {

@@ -65,7 +65,7 @@ public:
         )
         :
             MeshObject<fvMesh, centredCECCellToFaceStencilObject>(mesh),
-            extendedCentredCellToFaceStencil(CECCellToFaceStencil(mesh))
+            extendedCentredCellToFaceStencil(CECCellToFaceStencil(mesh).by_ref())
         {
             if (extendedCellToFaceStencil::debug)
             {

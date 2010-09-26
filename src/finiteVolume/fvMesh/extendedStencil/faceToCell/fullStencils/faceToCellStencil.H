@@ -93,6 +93,12 @@ public:
             return globalNumbering_;
         }
 
+        //- Work-around for C++ Standard Core Language Defect 391
+        const faceToCellStencil& by_ref() const
+        {
+            return *this;
+        }
+
 };
 
 

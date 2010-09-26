@@ -84,7 +84,7 @@ void Foam::meshRefinement::calcNeighbourData
 
     const polyBoundaryMesh& patches = mesh_.boundaryMesh();
 
-    labelHashSet addedPatchIDSet(meshedPatches());
+    labelHashSet addedPatchIDSet = meshedPatches();
 
     forAll(patches, patchI)
     {

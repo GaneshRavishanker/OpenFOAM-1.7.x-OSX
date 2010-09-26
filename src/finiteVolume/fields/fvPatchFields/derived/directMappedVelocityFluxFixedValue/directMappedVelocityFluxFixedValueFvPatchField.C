@@ -205,7 +205,7 @@ void directMappedVelocityFluxFixedValueFvPatchField::updateCoeffs()
                 distMap.constructMap(),
                 allUValues
             );
-            newUValues = patch().patchSlice(newUValues);
+            newUValues = static_cast<UList<vector> >(patch().patchSlice(newUValues));
 
             mapDistribute::distribute
             (
@@ -216,7 +216,7 @@ void directMappedVelocityFluxFixedValueFvPatchField::updateCoeffs()
                 distMap.constructMap(),
                 newPhiValues
             );
-            newPhiValues = patch().patchSlice(newPhiValues);
+            newPhiValues = static_cast<UList<scalar> >(patch().patchSlice(newPhiValues));
 
             break;
         }

@@ -160,11 +160,11 @@ void Foam::activeBaffleVelocityFvPatchVectorField::autoMap
     //  fvMesh::S() which will give problems when mapped (since already
     //  on new mesh)
     const vectorField& areas = patch().boundaryMesh().mesh().faceAreas();
-    initWallSf_ = patch().patchSlice(areas);
-    initCyclicSf_ = patch().boundaryMesh()
+    initWallSf_ = static_cast<UList<vector> >(patch().patchSlice(areas));
+    initCyclicSf_ = static_cast<UList<vector> >(patch().boundaryMesh()
     [
         cyclicPatchLabel_
-    ].patchSlice(areas);
+    ].patchSlice(areas));
 }
 
 void Foam::activeBaffleVelocityFvPatchVectorField::rmap
@@ -177,11 +177,11 @@ void Foam::activeBaffleVelocityFvPatchVectorField::rmap
 
     // See autoMap.
     const vectorField& areas = patch().boundaryMesh().mesh().faceAreas();
-    initWallSf_ = patch().patchSlice(areas);
-    initCyclicSf_ = patch().boundaryMesh()
+    initWallSf_ = static_cast<UList<vector> >(patch().patchSlice(areas));
+    initCyclicSf_ = static_cast<UList<vector> >(patch().boundaryMesh()
     [
         cyclicPatchLabel_
-    ].patchSlice(areas);
+    ].patchSlice(areas));
 }
 
 
