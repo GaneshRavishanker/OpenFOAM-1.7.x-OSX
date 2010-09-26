@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+
+OF_NAME=OpenFOAM-1.7.x
+OF_REVISION=0
+SUBDIRECTORY_OK=Yes
+USAGE="createDmg <arch> <outDir>"
+
+. "$(git --exec-path)/git-sh-setup"
+
+require_work_tree
+cd_to_toplevel
+
+set -e
+
+if [ $# -ne 2 ]
+then
+  usage
+fi
+
+arch=$1
+baseArch=${arch%[DS]P*}
+
+outDir=$2
+outFile=$outDir/$OF_NAME-$OF_REVISION-MacOSX-10.5-$arch.dmg
+
+# sanity checks
+for dir in lib/$arch applications/bin/$arch; do
+  if [ ! -d $dir ]; then
+    die "Error: Directory $dir does not exist"
+  fi
+done
+[ -e $outFile ] && die "Error: $outFile already exists"
+
+STAGING=`mktemp -d -t createDmg`
+trap "echo 'Cleaning away $STAGING'; rm -f $STAGING 2>/dev/null" EXIT TERM INT
+
+echo "Exporting the sources"
+git archive --prefix=$OF_NAME/ HEAD | tar -C $STAGING -xf -
+
+echo "Exporting the binaries"
+tar -cf - \
+  lib/$arch \
+  applications/bin/$arch \
+  wmake/rules \
+  wmake/bin/$baseArch \
+  | tar -C $STAGING/$OF_NAME -xf -
+
+echo "Creating the HTML README"
+asciidoc $STAGING/$OF_NAME/README.asciidoc
+
+echo "Creating the final DMG"
+mkdir -p $outDir
+hdiutil create -fs HFSX -volname "$OF_NAME" -srcfolder $STAGING/$OF_NAME \
+  -uid 99 -gid 99 -scrub -format UDZO \
+  -o $outFile
