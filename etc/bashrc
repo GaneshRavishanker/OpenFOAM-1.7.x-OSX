@@ -269,7 +269,7 @@ Darwin)
         esac
         ;;
     *)
-        echo "Unknown architecture "`uname -p` "for Darwin"
+        echo "Unknown architecture "$WM_OSX_ARCH "for Darwin"
     esac
     unset WM_SYSROOT WM_MACOSX_MIN
 
