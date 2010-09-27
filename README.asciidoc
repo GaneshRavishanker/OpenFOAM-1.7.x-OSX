@@ -1,0 +1,88 @@
+OpenFOAM 1.7.x for Mac OS X 10.5 and 10.6
+=========================================
+Michael Wild
+v1.0, September 26, 2010
+
+Introduction
+------------
+This is a custom build of OpenFOAM 1.7.x (http://www.openfoam.org, OpenCFD Ltd)
+created by Michael Wild <wild@ifd.mavt.ethz.ch>. Concerning licensing issues,
+refer to the COPYING file included in this package.
+
+[CAUTION]
+AS THIS IS A CUSTOM BUILD (INCLUDING UNOFFICIAL PATCHES), THIS SOFTWARE IS
+COMPLETELY UNSUPPORTED (NEITHER BY OPENCFD LTD NOR BY THE AUTHOR OF THIS
+PACKAGE) AND COMES WITHOUT ANY WARRANTY, EXPRESS OR IMPLIED.
+
+It has been configured to use the libraries and compiler included in Mac OS X
+10.5 and its corresponding developer tools (Xcode 3.1). It uses OpenMPI as the
+parallelization library.
+
+The official source has been patched to include the fixes provided by B.
+Gschaider
+(http://www.cfd-online.com/Forums/openfoam-installation/77570-patches-openfoam-1-7-macos-x.html)
+and applied additional fixes which are tracked in the
+http://www.github.com/themiwi/OpenFOAM-1.7.x-OSX[git repository].
+
+[CAUTION]
+THIS IS EXPERIMENTAL SOFTWARE AND PROBABLY NOT FIT FOR PRODUCTION USE. IT IS
+ENTIRELY UNSUPPORTED AND YOU USE IT AT YOUR OWN RISK.
+
+[CAUTION]
+To save disk space, this package is distributed without the third-party sources
+and intermediate files from the build process (e.g. object files) have been
+removed as well. This is why you shouldn't try to issue an +./Allwmake+ in any of
+the OpenFOAM-1.7.x directories. Furthermore the image is fixed-size and
+read-only. If you want to compile your own codes, do so in your
+'~/OpenFOAM/<username>-1.7.x directory'.
+
+System Requirements
+-------------------
+- Mac OS X 10.5 (Leopard) or 10.6 (Snow Leopard)
+- XCode 3.1 (provided on the Mac OS X installer DVD) or available from
+http://developer.apple.com if you plan on compiling your own code.
+
+Setup Instructions
+------------------
+- Download the appropriate disk image file ('\*.dmg') from below list to some
+  convenient place of your choice ('~/OpenFOAM/images' is recommended):
++
+--
+  * Intel Macs: http://www.github.com/downloads/themiwi/OpenFOAM-1.7.x-OSX/OpenFOAM-1.7.x-0-MacOSX-10.5-darwinIntel64DPOpt.dmg
+  * PowerPC Macs: http://www.github.com/downloads/themiwi/OpenFOAM-1.7.x-OSX/OpenFOAM-1.7.x-0-MacOSX-10.5-darwinPpcDPOpt.dmg
+--
++
+To the same directory download the file
+http://www.github.com/downloads/themiwi/OpenFOAM-1.7.x-OSX/setup_foam.sh['setup_foam.sh'].
+*IMPORTANT*: Make sure that the browser you use does not add a +.txt+ extension
+to the 'setup_foam.sh' file! Also, the 'Finder' usually lies to you about
+filename extensions, so please enable the setting
+'Finder->Preferences->Advanced->Show all filename extensions'.
+
+- Adjust the file 'setup_foam.sh' to match your setup according to the
+instructions in it. If you downloaded everything to '~/OpenFOAM/images', no
+changes need be made.
+
+- Type the following into 'Terminal.app':
++
+------------------
+test -f ~/.bash_profile && cp ~/.bash_profile ~/.bash_profile.bak_setup_foam_$(date '+%Y%m%d%H%M%S')
+echo ". ~/OpenFOAM/images/setup_foam.sh" >> ~/.bash_profile
+------------------
++
+Make sure to replace '~/OpenFOAM/images/setup_foam.sh' with the actual path to the
+'setup_foam.sh' file.
+
+- *Restart 'Terminal.app'*
+
+- Now, everytime you want to use OpenFOAM (i.e. when you started
+  'Terminal.app', opened a new window or tab), type
++
+------------------
+setup_foam
+------------------
++
+which will create a user disk-image (if it doesn't exist already), mount all
+the disk images and set up the environment for OpenFOAM.
+
+- That's it, you should be all set and ready to go!
