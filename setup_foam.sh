@@ -55,7 +55,7 @@ local OFUSERIMAGE=~/OpenFOAM/images/$LOGNAME-$OFVERSION.sparseimage
 
 # sanity checks
 for d in ~/OpenFOAM/OpenFOAM-$OFVERSION ~/OpenFOAM/$LOGNAME-$OFVERSION; do
-  if [ -d $d -a $(ls $d | wc -l) -eq 0 ]; then
+  if [ -d $d -a $(ls $d 2>/dev/null | wc -l) -eq 0 ]; then
     echo "Error: The directory '$d'" >&2
     echo "exists, but is empty. It is likely that it" >&2
     echo "is a left-over from a crash, forced shutdown" >&2
