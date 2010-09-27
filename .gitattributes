@@ -1,2 +1,3 @@
 /.git* export-ignore
 /ThirdParty.patch export-ignore
+/setup_foam.sh export-ignore
