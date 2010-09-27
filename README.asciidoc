@@ -53,7 +53,7 @@ Setup Instructions
 --
 +
 To the same directory download the file
-http://www.github.com/downloads/themiwi/OpenFOAM-1.7.x-OSX/setup_foam.sh['setup_foam.sh'].
+http://github.com/themiwi/OpenFOAM-1.7.x-OSX/raw/master/setup_foam.sh['setup_foam.sh'].
 *IMPORTANT*: Make sure that the browser you use does not add a +.txt+ extension
 to the 'setup_foam.sh' file! Also, the 'Finder' usually lies to you about
 filename extensions, so please enable the setting
