@@ -87,12 +87,12 @@ done
 
 # get a sensible caseName
 caseName=${PWD##*/}
-caseFile="$caseName.OpenFOAM"
+caseFile="$caseName.foam"
 fvControls="system"
 
 if [ -n "$regionName" ]
 then
-    caseFile="$caseName{$regionName}.OpenFOAM"
+    caseFile="$caseName{$regionName}.foam"
     fvControls="$fvControls/$regionName"
 fi
 
@@ -136,7 +136,35 @@ case "$ParaView_VERSION" in
         echo "created temporary '$caseFile'"
     }
 
-    paraview --data="$caseFile"
+    if [ "`uname -s`" != Darwin ]; then
+        paraview --data="$caseFile"
+    else
+        PARAVIEW=
+        if [ -n "$FOAM_PV3_APP" -a -e "$FOAM_PV3_APP/Contents/MacOS/paraview" ]
+        then
+            PARAVIEW="$FOAM_PV3_APP/Contents/MacOS/paraview"
+        else
+            # guess common paraview names
+            PARAVIEW=$(
+            echo /Applications/ParaView\ 3.[89].*.app | sort -r | \
+            while read n; do
+                n="$n/Contents/MacOS/paraview"
+                if [ -x "$n" ]; then
+                    echo "$n"
+                    break
+                fi
+            done
+            )
+        fi
+        if [ -z "$PARAVIEW" ]; then
+            echo "Error: Could not find ParaView 3.8.x. Either point" >&2
+            echo "FOAM_PV3_APP to the full path of the application bundle" >&2
+            echo "or if you don't have it, download and install it from" >&2
+            echo "http://www.paraview.org" >&2
+            exit 1;
+        fi
+        "$PARAVIEW" --data=$caseFile
+    fi
     ;;
 
 esac
