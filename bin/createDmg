@@ -31,7 +31,7 @@ for dir in lib/$arch applications/bin/$arch; do
 done
 [ -e $outFile ] && die "Error: $outFile already exists"
 
-STAGING=`mktemp -d -t createDmg`
+STAGING=`mktemp -d $PWD/createDmg-TMP.XXXXXX`
 trap "echo 'Cleaning away $STAGING'; rm -f $STAGING 2>/dev/null" EXIT TERM INT
 
 echo "Exporting the sources"
