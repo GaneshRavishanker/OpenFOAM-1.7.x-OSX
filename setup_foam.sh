@@ -38,7 +38,7 @@ function setup_foam {
 local OFVERSION=1.7.x
 
 # The revision of the DMG file
-local OFREVISION=0
+local OFREVISION=1
 
 # The architecture of your Mac (or rather of the disk image you downloaded)
 local OFARCH=darwinIntel64DPOpt
