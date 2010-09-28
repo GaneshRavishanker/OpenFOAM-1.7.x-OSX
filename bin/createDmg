@@ -43,6 +43,7 @@ tar -cf - \
   applications/bin/$arch \
   wmake/rules \
   wmake/bin/$baseArch \
+  $(find . -type d -name lnInclude) \
   | tar -C $STAGING/$OF_NAME -xf -
 
 echo "Creating the HTML README"
