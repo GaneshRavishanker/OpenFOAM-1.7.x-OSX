@@ -28,39 +28,47 @@ Description
     Calculates the field averages given list of fieldAverageItems, e.g.
 
     @verbatim
-    fieldAverage1
-    {
-        // Type of functionObject
-        type fieldAverage;
+    functions(
+        fieldAverage1
+        {
+            // Type of functionObject
+            type fieldAverage;
 
-        // Where to load it from (if not already in solver)
-        functionObjectLibs ("libfieldAverage.so");
+            // Where to load it from (if not already in solver)
+            functionObjectLibs ("libfieldAverage.so");
 
-        // Whether to perform a clean restart, or start from previous
-        // averaging info if available
-        cleanRestart true;
+            // When to create the output (outputTime or timeStep)
+            outputControl outputTime;    // controlled by writeControl above
+            // outputControl timeStep;   // specify time-step intervals
+            // outputInterval 100;       // time-steps between output
 
-        // Whether to reset the averaged fields after they have been written.
-        // Used to average over only the preceding write interval for transient
-        // cases.
-        resetOnOutput true;
+            // Whether to perform a clean restart, or start from previous
+            // averaging info if available
+            cleanRestart true;
 
-        // Fields to be averaged. runTime modifiable!
-        fields
-        (
-            U
-            {
-                mean            on;
-                prime2Mean      on;
-                base            time;
-            }
-            p
-            {
-                mean            on;
-                prime2Mean      on;
-                base            time;
-            }
-        );
+            // Whether to reset the averaged fields after they have been written.
+            // Used to average over only the preceding write interval for transient
+            // cases.
+            resetOnOutput true;
+
+            // Fields to be averaged. runTime modifiable!
+            fields
+            (
+                U
+                {
+                    mean            on;
+                    prime2Mean      on;
+                    base            time;
+                }
+                p
+                {
+                    mean            on;
+                    prime2Mean      on;
+                    base            time;
+                }
+            );
+        }
+    );
     @endverbatim
 
     Member function calcAverages() calculates the averages.

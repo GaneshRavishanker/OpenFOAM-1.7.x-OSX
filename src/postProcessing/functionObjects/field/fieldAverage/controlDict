@@ -45,7 +45,7 @@ timePrecision   6;
 runTimeModifiable yes;
 
 functions
-{
+(
     fieldAverage1
     {
         // Type of functionObject
@@ -53,6 +53,20 @@ functions
 
         // Where to load it from (if not already in solver)
         functionObjectLibs ("libfieldAverage.so");
+
+        // When to create the output (outputTime or timeStep)
+        outputControl outputTime;    // controlled by writeControl above
+        // outputControl timeStep;   // specify time-step intervals
+        // outputInterval 100;       // time-steps between output
+
+        // Whether to perform a clean restart, or start from previous
+        // averaging info if available
+        cleanRestart true;
+
+        // Whether to reset the averaged fields after they have been written.
+        // Used to average over only the preceding write interval for transient
+        // cases.
+        resetOnOutput true;
 
         // Fields to be averaged - runTime modifiable
         fields
@@ -72,6 +86,6 @@ functions
             }
         );
     }
-}
+);
 
 // ************************************************************************* //
