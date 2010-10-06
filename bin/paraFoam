@@ -146,9 +146,8 @@ case "$ParaView_VERSION" in
         else
             # guess common paraview names
             PARAVIEW=$(
-            echo /Applications/ParaView\ 3.[89].*.app | sort -r | \
+            ls /Applications/ParaView\ 3.[89].*.app/Contents/MacOS/paraview | sort -r | \
             while read n; do
-                n="$n/Contents/MacOS/paraview"
                 if [ -x "$n" ]; then
                     echo "$n"
                     break
