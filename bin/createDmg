@@ -32,7 +32,7 @@ done
 [ -e $outFile ] && die "Error: $outFile already exists"
 
 STAGING=`mktemp -d $PWD/createDmg-TMP.XXXXXX`
-trap "echo 'Cleaning away $STAGING'; rm -f $STAGING 2>/dev/null" EXIT TERM INT
+trap "echo 'Cleaning away $STAGING'; rm -rf $STAGING 2>/dev/null" EXIT TERM INT
 
 echo "Exporting the sources"
 git archive --prefix=$OF_NAME/ HEAD | tar -C $STAGING -xf -
@@ -43,7 +43,7 @@ tar -cf - \
   applications/bin/$arch \
   wmake/rules \
   wmake/bin/$baseArch \
-  $(find . -type d -name lnInclude) \
+  $(find src applications -type d -name lnInclude) \
   | tar -C $STAGING/$OF_NAME -xf -
 
 echo "Creating the HTML README"
