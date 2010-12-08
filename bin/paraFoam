@@ -37,7 +37,7 @@ usage: ${0##*/} [OPTION]
 options:
   -case   dir    specify alternative case directory
   -region name   specify mesh region name
-  -touch         only create the .OpenFOAM file
+  -touch         only create the .foam file
 
 * start paraview $ParaView_VERSION with the OpenFOAM libraries
 
@@ -87,12 +87,12 @@ done
 
 # get a sensible caseName
 caseName=${PWD##*/}
-caseFile="$caseName.OpenFOAM"
+caseFile="$caseName.foam"
 fvControls="system"
 
 if [ -n "$regionName" ]
 then
-    caseFile="$caseName{$regionName}.OpenFOAM"
+    caseFile="$caseName{$regionName}.foam"
     fvControls="$fvControls/$regionName"
 fi
 
