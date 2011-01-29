@@ -43,8 +43,6 @@ SourceFiles
 #include "pointField.H"
 #include "Tuple2.H"
 #include "pointIndexHit.H"
-#include "mapDistribute.H"
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -53,6 +51,7 @@ namespace Foam
 
 class polyPatch;
 class polyMesh;
+class mapDistribute;
 
 /*---------------------------------------------------------------------------*\
                       Class directMappedPatchBase Declaration
@@ -66,10 +65,38 @@ public:
         //- Mesh items to sample
         enum sampleMode
         {
-            NEARESTCELL,
-            NEARESTPATCHFACE,
-            NEARESTFACE
+            NEARESTCELL,        // nearest cell
+            NEARESTPATCHFACE,   // faces on selected patch
+            NEARESTFACE         // nearest face
         };
+
+
+    //- Helper class for finding nearest
+    //  - point+local index
+    //  - sqr(distance)
+    //  - processor
+    typedef Tuple2<pointIndexHit, Tuple2<scalar, label> > nearInfo;
+
+    class nearestEqOp
+    {
+
+    public:
+
+        void operator()(nearInfo& x, const nearInfo& y) const
+        {
+            if (y.first().hit())
+            {
+                if (!x.first().hit())
+                {
+                    x = y;
+                }
+                else if (y.second().first() < x.second().first())
+                {
+                    x = y;
+                }
+            }
+        }
+    };
 
 private:
 
@@ -193,7 +220,7 @@ public:
             return sampleRegion_;
         }
 
-        //- Patch (only if NEARESTBOUNDARY)
+        //- Patch (only if NEARESTPATCHFACE)
         const word& samplePatch() const
         {
             return samplePatch_;

@@ -29,6 +29,7 @@ License
 #include "volFields.H"
 #include "surfaceFields.H"
 #include "addToRunTimeSelectionTable.H"
+#include "mapDistribute.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -112,13 +113,6 @@ directMappedVelocityFluxFixedValueFvPatchField
             << " in file " << dimensionedInternalField().objectPath()
             << exit(FatalError);
     }
-
-    // Force calculation of schedule (uses parallel comms)
-    const directMappedPolyPatch& mpp = refCast<const directMappedPolyPatch>
-    (
-        patch().patch()
-    );
-    (void)mpp.map().schedule();
 }
 
 
@@ -191,8 +185,8 @@ void directMappedVelocityFluxFixedValueFvPatchField::updateCoeffs()
 
                 forAll(Upf, faceI)
                 {
-                    allUValues[faceStart++] = Upf[faceI];
-                    allPhiValues[faceStart] = phipf[faceI];
+                    allUValues[faceStart + faceI] = Upf[faceI];
+                    allPhiValues[faceStart + faceI] = phipf[faceI];
                 }
             }
 
@@ -205,7 +199,7 @@ void directMappedVelocityFluxFixedValueFvPatchField::updateCoeffs()
                 distMap.constructMap(),
                 allUValues
             );
-            newUValues = static_cast<UList<vector> >(patch().patchSlice(newUValues));
+            newUValues.transfer(allUValues);
 
             mapDistribute::distribute
             (
@@ -214,9 +208,9 @@ void directMappedVelocityFluxFixedValueFvPatchField::updateCoeffs()
                 distMap.constructSize(),
                 distMap.subMap(),
                 distMap.constructMap(),
-                newPhiValues
+                allPhiValues
             );
-            newPhiValues = static_cast<UList<scalar> >(patch().patchSlice(newPhiValues));
+            newPhiValues.transfer(allPhiValues);
 
             break;
         }

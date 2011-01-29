@@ -27,6 +27,10 @@ Class
 Description
     Recycles the velocity and flux at a patch to this patch
 
+    mode = NEARESTPATCHFACE : sample nearest face on selected patch
+    mode = NEARESTFACE : sample nearest face on any patch. Note: does not
+                         warn if nearest actually is on internal face!
+
 SourceFiles
     directMappedVelocityFluxFixedValueFvPatchField.C
 

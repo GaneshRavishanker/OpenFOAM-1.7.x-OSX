@@ -26,6 +26,7 @@ License
 #include "directMappedFixedValueFvPatchField.H"
 #include "directMappedPatchBase.H"
 #include "volFields.H"
+#include "mapDistribute.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -267,7 +268,7 @@ void directMappedFixedValueFvPatchField<Type>::updateCoeffs()
                 allValues
             );
 
-            newValues = static_cast<UList<Type> >(this->patch().patchSlice(allValues));
+            newValues.transfer(allValues);
 
             break;
         }

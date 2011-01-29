@@ -46,7 +46,7 @@ tmp<volScalarField> SpalartAllmarasIDDES::alpha() const
 {
     return max
     (
-        0.25 - y_/dimensionedScalar("hMax", dimLength, max(cmptMax(delta()))),
+        0.25 - y_/static_cast<const volScalarField&>(hmax_()),
         scalar(-5)
     );
 }
@@ -147,7 +147,24 @@ SpalartAllmarasIDDES::SpalartAllmarasIDDES
 )
 :
     SpalartAllmaras(U, phi, transport, typeName),
-
+    hmax_
+    (
+        LESdelta::New
+        (
+            "hmax",
+            mesh_,
+            *this
+        )
+    ),
+    IDDESDelta_
+    (
+        LESdelta::New
+        (
+            "IDDESDelta",
+            mesh_,
+            this->subDict(typeName + "Coeffs")
+        )
+    ),
     fwStar_
     (
         dimensioned<scalar>::lookupOrAddToDict
