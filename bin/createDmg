@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 OF_NAME=OpenFOAM-1.7.x
-OF_REVISION=1
+OF_REVISION=2
 SUBDIRECTORY_OK=Yes
 USAGE="createDmg <arch> <outDir>"
 
