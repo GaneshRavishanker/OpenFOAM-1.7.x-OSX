@@ -21,28 +21,49 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Namespace
+    Foam::PstreamGlobals
+
+Description
+    Global functions and variables for working with parallel streams,
+    but principally for gamma/mpi
+
+SourceFiles
+    PstreamGlobals.C
+
 \*---------------------------------------------------------------------------*/
 
-#include "sumData.H"
+#ifndef PstreamGlobals_H
+#define PstreamGlobals_H
 
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
+#include "mpi.h"
 
-Foam::Ostream& Foam::operator<<
-(
-    Foam::Ostream& os,
-    const Foam::sumData& wDist
-)
+#include "DynamicList.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
 {
-    return os
-        << wDist.oldFace_ << token::SPACE
-        << wDist.sum_ << token::SPACE << wDist.count_;
-}
 
+/*---------------------------------------------------------------------------*\
+                           Class PstreamGlobals Declaration
+\*---------------------------------------------------------------------------*/
 
-Foam::Istream& Foam::operator>>(Foam::Istream& is, Foam::sumData& wDist)
+namespace PstreamGlobals
 {
-    return is >> wDist.oldFace_ >> wDist.sum_ >> wDist.count_;
-}
 
+extern DynamicList<MPI_Request> IPstream_outstandingRequests_;
+extern DynamicList<MPI_Request> OPstream_outstandingRequests_;
+
+};
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //

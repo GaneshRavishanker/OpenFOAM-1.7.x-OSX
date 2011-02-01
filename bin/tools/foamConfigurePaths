@@ -1,4 +1,4 @@
-#!/bin/sh -x
+#!/bin/sh
 #---------------------------------*- sh -*-------------------------------------
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
@@ -36,6 +36,7 @@ usage() {
 usage: ${0##*/}
   --foamInstall dir         specify installation directory (e.g. /opt)
   --projectName name        specify project name (e.g. openfoam170)
+  --projectVersion ver      specify project version (e.g. 1.7.x)
   --archOption  arch        specify architecture option (only 32 or 64 applicable)
   --paraviewInstall dir     specify ParaView_DIR (e.g. /opt/paraviewopenfoam380)
 
@@ -53,13 +54,14 @@ _inlineSed()
     backup=`tempfile`
     cp $1 $backup
     sed -i -e "$2" $1
-    cmp  --quiet $1 $backup && usage "Failed : $3"
+    cmp --quiet $1 $backup && usage "Failed : $3"
+    return 0
 }
 
 
 [ -f etc/bashrc -a -f etc/settings.sh ] || usage "Please run from top-level directory of installation"
 
-unset foamInstall projectName archOption paraviewInstall
+unset foamInstall projectName projectVersion archOption paraviewInstall
 
 # parse options
 while [ "$#" -gt 0 ]
@@ -71,8 +73,6 @@ do
     --foamInstall)
         [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
         foamInstall="$2"
-        echo "** foamInstall:$foamInstall"
-
         _inlineSed \
             etc/bashrc \
             '/^[^#]/s@foamInstall=.*@foamInstall='"$foamInstall@" \
@@ -86,6 +86,15 @@ do
             etc/bashrc \
             '/^[^#]/s@WM_PROJECT_DIR=.*@WM_PROJECT_DIR=$WM_PROJECT_INST_DIR/'"$projectName@" \
             "Replacing WM_PROJECT_DIR setting by $projectName"
+        shift 2
+        ;;
+   --projectVersion)
+        [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
+        projectVersion="$2"
+        _inlineSed \
+            etc/bashrc \
+            '/^[^#]/s@WM_PROJECT_VERSION=.*@WM_PROJECT_VERSION='"$projectVersion@" \
+            "Replacing WM_PROJECT_VERSION setting by $projectVersion"
         shift 2
         ;;
     --archOption)
@@ -112,7 +121,7 @@ do
     esac
 done
 
-[ -n "$foamInstall" -o -n "$projectName" -o -n "$archOption"  -o -n "$paraviewInstall" ] || usage "Please specify at least one configure option"
+[ -n "$foamInstall" -o -n "$projectName" -o -n "$projectVersion" -o -n "$archOption"  -o -n "$paraviewInstall" ] || usage "Please specify at least one configure option"
 
 #echo "Replacing WM_PROJECT setting by $projectName"
 #sed -i -e 's@WM_PROJECT=.*@WM_PROJECT='"$projectName@" etc/bashrc

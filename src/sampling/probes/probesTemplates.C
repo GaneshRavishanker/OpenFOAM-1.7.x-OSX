@@ -187,9 +187,9 @@ Foam::probes::sample
 
     forAll(probeLocations_, probeI)
     {
-        if (cellList_[probeI] >= 0)
+        if (elementList_[probeI] >= 0)
         {
-            values[probeI] = vField[cellList_[probeI]];
+            values[probeI] = vField[elementList_[probeI]];
         }
     }
 
