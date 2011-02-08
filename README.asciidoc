@@ -48,8 +48,8 @@ Setup Instructions
   convenient place of your choice ('~/OpenFOAM/images' is recommended):
 +
 --
-  * Intel Macs: http://www.github.com/downloads/themiwi/OpenFOAM-1.7.x-OSX/OpenFOAM-1.7.x-1-MacOSX-10.5-darwinIntel64DPOpt.dmg
-  * PowerPC Macs: http://www.github.com/downloads/themiwi/OpenFOAM-1.7.x-OSX/OpenFOAM-1.7.x-1-MacOSX-10.5-darwinPpcDPOpt.dmg
+  * Intel Macs: http://www.github.com/downloads/themiwi/OpenFOAM-1.7.x-OSX/OpenFOAM-1.7.x-2-MacOSX-10.5-darwinIntel64DPOpt.dmg
+  * PowerPC Macs: http://www.github.com/downloads/themiwi/OpenFOAM-1.7.x-OSX/OpenFOAM-1.7.x-2-MacOSX-10.5-darwinPpcDPOpt.dmg
 --
 +
 To the same directory download the file
