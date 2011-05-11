@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,110 +22,99 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    cellPointWeight
+    pointLinear
 
 Description
+    Face-point interpolation scheme class derived from linear and
+    returns linear weighting factors but also applies an explicit correction.
+
+    Uses volPointInterpolation to obtain the field values at the face-points.
 
 SourceFiles
-    cellPointWeight.C
-    findCellPointTet.H
-    findCellPointTriangle.H
+    pointLinear.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef cellPointWeight_H
-#define cellPointWeight_H
+#ifndef pointLinear_H
+#define pointLinear_H
 
-#include "vector.H"
+#include "linear.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-class polyMesh;
-
 /*---------------------------------------------------------------------------*\
-                           Class cellPointWeight Declaration
+                           Class pointLinear Declaration
 \*---------------------------------------------------------------------------*/
 
-class cellPointWeight
+template<class Type>
+class pointLinear
+:
+    public linear<Type>
 {
-    // Private data
-
-       vector position_;
-       label cellNo_;
-       label face_;
-       FixedList<scalar, 4> weights_;
-       FixedList<label, 3> faceVertices_;
-       label cellFace_;
-
-       
     // Private Member Functions
 
-        bool findTet
-        (
-            const polyMesh& mesh,
-            const label nFace,
-            vector tetPoints[],
-            label tetLabelCandidate[],
-            scalar phiCandidate[],
-            label& closestFace,
-            scalar& minDistance
-        );
+        //- Disallow default bitwise copy construct
+        pointLinear(const pointLinear&);
 
-        bool findTriangle
-        (
-            const polyMesh& mesh,
-            const label nFace
-        );
+        //- Disallow default bitwise assignment
+        void operator=(const pointLinear&);
 
 
 public:
 
+    //- Runtime type information
+    TypeName("pointLinear");
+
+
     // Constructors
 
-        //- Construct from components
-        cellPointWeight
+        //- Construct from mesh
+        pointLinear(const fvMesh& mesh)
+        :
+            linear<Type>(mesh)
+        {}
+
+
+        //- Construct from mesh and Istream
+        pointLinear
         (
-            const polyMesh& mesh,
-            const vector& position, 
-            const label nCell,
-            const label facei = -1
-        );
+            const fvMesh& mesh,
+            Istream&
+        )
+        :
+            linear<Type>(mesh)
+        {}
+
+
+        //- Construct from mesh, faceFlux and Istream
+        pointLinear
+        (
+            const fvMesh& mesh,
+            const surfaceScalarField&,
+            Istream&
+        )
+        :
+            linear<Type>(mesh)
+        {}
 
 
     // Member Functions
 
-        //- cell label
-        inline label cell() const
+        //- Return true if this scheme uses an explicit correction
+        virtual bool corrected() const
         {
-            return cellNo_;
+            return true;
         }
 
-        //- face label
-        inline label face() const
-        {
-            return face_;
-        }
-        
-        //- interpolation weights
-        inline const FixedList<scalar, 4>& weights() const
-        {
-            return weights_;
-        }
-        
-        //- interpolation addressing for points on face
-        inline const FixedList<label, 3>& faceVertices() const
-        {
-            return faceVertices_;
-        }
-
-        //- face label
-        inline label cellFace() const
-        {
-            return cellFace_;
-        }
+        //- Return the explicit correction to the face-interpolate
+        virtual tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >
+        correction
+        (
+            const GeometricField<Type, fvPatchField, volMesh>& vf
+        ) const;
 };
 
 

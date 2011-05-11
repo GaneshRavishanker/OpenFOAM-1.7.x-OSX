@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,18 +43,6 @@ namespace Foam
 
     addToRunTimeSelectionTable(polyPatch, cyclicPolyPatch, word);
     addToRunTimeSelectionTable(polyPatch, cyclicPolyPatch, dictionary);
-
-
-template<>
-const char* NamedEnum<cyclicPolyPatch::transformType, 3>::names[] =
-{
-    "unknown",
-    "rotational",
-    "translational"
-};
-
-const NamedEnum<cyclicPolyPatch::transformType, 3>
-    cyclicPolyPatch::transformTypeNames;
 }
 
 
@@ -153,6 +141,9 @@ void Foam::cyclicPolyPatch::calcTransforms()
         vectorField half0Normals(half0.size());
         vectorField half1Normals(half1.size());
 
+        scalar maxAreaDiff = -GREAT;
+        label maxAreaFacei = -1;
+
         for (label facei = 0; facei < size()/2; facei++)
         {
             half0Normals[facei] = operator[](facei).normal(points);
@@ -171,37 +162,63 @@ void Foam::cyclicPolyPatch::calcTransforms()
                 half0Normals[facei] = point(1, 0, 0);
                 half1Normals[facei] = half0Normals[facei];
             }
-            else if (mag(magSf - nbrMagSf)/avSf > coupledPolyPatch::matchTol)
-            {
-                FatalErrorIn
-                (
-                    "cyclicPolyPatch::calcTransforms()"
-                )   << "face " << facei << " area does not match neighbour "
-                    << nbrFacei << " by "
-                    << 100*mag(magSf - nbrMagSf)/avSf
-                    << "% -- possible face ordering problem." << endl
-                    << "patch:" << name()
-                    << " my area:" << magSf
-                    << " neighbour area:" << nbrMagSf
-                    << " matching tolerance:" << coupledPolyPatch::matchTol
-                     << endl
-                    << "Mesh face:" << start()+facei
-                    << " vertices:"
-                    << UIndirectList<point>(points, operator[](facei))()
-                    << endl
-                    << "Neighbour face:" << start()+nbrFacei
-                    << " vertices:"
-                    << UIndirectList<point>(points, operator[](nbrFacei))()
-                    << endl
-                    << "Rerun with cyclic debug flag set"
-                    << " for more information." << exit(FatalError);
-            }
             else
             {
-                half0Normals[facei] /= magSf;
-                half1Normals[facei] /= nbrMagSf;
+                scalar areaDiff = mag(magSf - nbrMagSf)/avSf;
+
+                if (areaDiff > maxAreaDiff)
+                {
+                    maxAreaDiff = areaDiff;
+                    maxAreaFacei = facei;
+                }
+
+                if (areaDiff > coupledPolyPatch::matchTol)
+                {
+                    FatalErrorIn
+                    (
+                        "cyclicPolyPatch::calcTransforms()"
+                    )   << "face " << facei << " area does not match neighbour "
+                        << nbrFacei << " by "
+                        << 100*areaDiff
+                        << "% -- possible face ordering problem." << endl
+                        << "patch:" << name()
+                        << " my area:" << magSf
+                        << " neighbour area:" << nbrMagSf
+                        << " matching tolerance:"
+                        << coupledPolyPatch::matchTol
+                         << endl
+                        << "Mesh face:" << start()+facei
+                        << " vertices:"
+                        << UIndirectList<point>(points, operator[](facei))()
+                        << endl
+                        << "Neighbour face:" << start()+nbrFacei
+                        << " vertices:"
+                        << UIndirectList<point>(points, operator[](nbrFacei))()
+                        << endl
+                        << "Rerun with cyclic debug flag set"
+                        << " for more information." << exit(FatalError);
+                }
+                else
+                {
+                    half0Normals[facei] /= magSf;
+                    half1Normals[facei] /= nbrMagSf;
+                }
             }
         }
+
+
+        // Print area match
+        if (debug)
+        {
+            label nbrFacei = maxAreaFacei+size()/2;
+            Pout<< "cyclicPolyPatch::calcTransforms :"
+                << " Max area error:" << 100*maxAreaDiff << "% at face:"
+                << maxAreaFacei << " at:" << half0Ctrs[maxAreaFacei]
+                << " coupled face:" << nbrFacei
+                << " at:" << half1Ctrs[maxAreaFacei]
+                << endl;
+        }
+
 
 
         // See if transformation is prescribed
@@ -234,7 +251,9 @@ void Foam::cyclicPolyPatch::calcTransforms()
                 {
                     Pout<< "cyclicPolyPatch::calcTransforms :"
                         << " Specified rotation :"
-                        << " n0:" << n0 << " n1:" << n1 << endl;
+                        << " n0:" << n0 << " from face " << half0Ctrs[face0]
+                        << " and n1:" << n1 << " from face " << half1Ctrs[face1]
+                        << endl;
                 }
 
                 // Calculate transformation tensors from face0,1 only.
@@ -246,7 +265,69 @@ void Foam::cyclicPolyPatch::calcTransforms()
                     vectorField(1, n0),
                     vectorField(1, n1),
                     scalarField(1, half0Tols[face0]),
-                    1E-4
+                    1E-4,
+                    ROTATIONAL
+                );
+
+                break;
+            }
+
+            case TRANSLATIONAL:
+            {
+                // Calculate transformation tensors from all faces just to
+                // compare against user provided tolerance.
+                calcTransformTensors
+                (
+                    half0Ctrs,
+                    half1Ctrs,
+                    half0Normals,
+                    half1Normals,
+                    half0Tols,
+                    matchTol,
+                    transform_
+                );
+
+                if (debug)
+                {
+                    Pout<< "cyclicPolyPatch::calcTransforms :"
+                        << " Specified separation vector : "
+                        << separationVector_
+                        << " . Calculated average separation : "
+                        << average(coupledPolyPatch::separation())
+                        << endl;
+                }
+
+                // Override computed transform with specified.
+                const scalar avgTol = average(half0Tols);
+                if
+                (
+                    coupledPolyPatch::separation().size() != 1
+                 || mag(separation(0) - separationVector_) > avgTol
+                )
+                {
+                    WarningIn
+                    (
+                        "cyclicPolyPatch::calcTransforms()"
+                    )   << "Specified separationVector " << separationVector_
+                        << " differs from computed separation vector "
+                        << coupledPolyPatch::separation() << endl
+                        << "This probably means your geometry is not consistent"
+                        << " with the specified separation and might lead"
+                        << " to problems." << endl
+                        << "Continuing with specified separation vector "
+                        << separationVector_ << endl
+                        << "patch:" << name()
+                        << endl;
+                }
+
+                // Set transformation tensor.
+                const_cast<tensorField&>(coupledPolyPatch::forwardT()).clear();
+                const_cast<tensorField&>(coupledPolyPatch::reverseT()).clear();
+                const_cast<vectorField&>(coupledPolyPatch::separation()) =
+                vectorField
+                (
+                    1,
+                    separationVector_
                 );
 
                 break;
@@ -261,7 +342,9 @@ void Foam::cyclicPolyPatch::calcTransforms()
                     half1Ctrs,
                     half0Normals,
                     half1Normals,
-                    half0Tols
+                    half0Tols,
+                    matchTol,
+                    transform_
                 );
 
                 break;
@@ -498,30 +581,51 @@ void Foam::cyclicPolyPatch::getCentresAndAnchors
             // Rotation
             forAll(half0Ctrs, faceI)
             {
-                half0Ctrs[faceI] = Foam::transform(reverseT, half0Ctrs[faceI]);
-                anchors0[faceI] = Foam::transform(reverseT, anchors0[faceI]);
+                half0Ctrs[faceI] =
+                    Foam::transform
+                    (
+                        reverseT,
+                        half0Ctrs[faceI] - rotationCentre_
+                    )
+                  + rotationCentre_;
+                anchors0[faceI] =
+                    Foam::transform
+                    (
+                        reverseT,
+                        anchors0[faceI] - rotationCentre_
+                    )
+                  + rotationCentre_;
             }
 
-            ppPoints = Foam::transform(reverseT, pp.points());
+            ppPoints =
+                Foam::transform
+                (
+                    reverseT,
+                    (pp.points() - rotationCentre_)()
+                )
+              + rotationCentre_;
 
             break;
         }
-        //- Problem: usually specified translation is not accurate enough
-        //- to get proper match so keep automatic determination over here.
-        //case TRANSLATIONAL:
-        //{
-        //    // Transform 0 points.
-        //
-        //    if (debug)
-        //    {
-        //        Pout<< "cyclicPolyPatch::getCentresAndAnchors :"
-        //            << "Specified translation : " << separationVector_ << endl;
-        //    }
-        //
-        //    half0Ctrs += separationVector_;
-        //    anchors0 += separationVector_;
-        //    break;
-        //}
+
+        case TRANSLATIONAL:
+        {
+            // Transform 0 points.
+
+            if (debug)
+            {
+                Pout<< "cyclicPolyPatch::getCentresAndAnchors :"
+                    << "Specified translation : " << separationVector_
+                    << endl;
+            }
+
+            half0Ctrs += separationVector_;
+            anchors0 += separationVector_;
+            ppPoints = pp.points() + separationVector_;
+
+            break;
+        }
+
         default:
         {
             // Assumes that cyclic is planar. This is also the initial
@@ -689,33 +793,20 @@ Foam::label Foam::cyclicPolyPatch::getConsistentRotationFace
     const pointField& faceCentres
 ) const
 {
+    // Determine a face furthest away from the axis
+
     const scalarField magRadSqr =
         magSqr((faceCentres - rotationCentre_) ^ rotationAxis_);
-    scalarField axisLen = (faceCentres - rotationCentre_) & rotationAxis_;
-    axisLen = axisLen - min(axisLen);
-    const scalarField magLenSqr = magRadSqr + axisLen*axisLen;
 
-    label rotFace = -1;
-    scalar maxMagLenSqr = -GREAT;
-    scalar maxMagRadSqr = -GREAT;
-    forAll(faceCentres, i)
-    {
-        if (magLenSqr[i] >= maxMagLenSqr)
-        {
-            if (magRadSqr[i] > maxMagRadSqr)
-            {
-                rotFace = i;
-                maxMagLenSqr = magLenSqr[i];
-                maxMagRadSqr = magRadSqr[i];
-            }
-        }
-    }
+    label rotFace = findMax(magRadSqr);
 
     if (debug)
     {
         Info<< "getConsistentRotationFace(const pointField&)" << nl
-            << "    rotFace = " << rotFace << nl
-            << "    point =  " << faceCentres[rotFace] << endl;
+            << "    rotFace  = " << rotFace << nl
+            << "    point    =  " << faceCentres[rotFace] << nl
+            << "    distance = " << Foam::sqrt(magRadSqr[rotFace])
+            << endl;
     }
 
     return rotFace;
@@ -1178,6 +1269,15 @@ bool Foam::cyclicPolyPatch::order
         tols
     );
 
+    if (debug)
+    {
+        Pout<< "half0 transformed faceCentres (avg)   : "
+            << gAverage(half0Ctrs) << nl
+            << "half1 untransformed faceCentres (avg) : "
+            << gAverage(half1Ctrs) << endl;
+    }
+
+
     // Geometric match of face centre vectors
     labelList from1To0;
     bool matchedAll = matchPoints
@@ -1205,28 +1305,23 @@ bool Foam::cyclicPolyPatch::order
             << " faces to OBJ file " << nm1 << endl;
         writeOBJ(nm1, half1Faces, pp.points());
 
-        OFstream ccStr
-        (
-            boundaryMesh().mesh().time().path()
-           /"match1_"+ name() + "_faceCentres.obj"
-        );
-        Pout<< "cyclicPolyPatch::order : "
-            << "Dumping currently found cyclic match as lines between"
-            << " corresponding face centres to file " << ccStr.name()
-            << endl;
-
-        // Recalculate untransformed face centres
-        //pointField rawHalf0Ctrs = calcFaceCentres(half0Faces, pp.points());
-        label vertI = 0;
-
-        forAll(half1Ctrs, i)
+        if (matchedAll)
         {
-            //if (from1To0[i] != -1)
+            OFstream ccStr
+            (
+                boundaryMesh().mesh().time().path()
+               /"match1_"+ name() + "_faceCentres.obj"
+            );
+            Pout<< "cyclicPolyPatch::order : "
+                << "Dumping currently found cyclic match as lines between"
+                << " corresponding face centres to file " << ccStr.name()
+                << endl;
+
+            label vertI = 0;
+            forAll(half1Ctrs, i)
             {
                 // Write edge between c1 and c0
-                //const point& c0 = rawHalf0Ctrs[from1To0[i]];
-                //const point& c0 = half0Ctrs[from1To0[i]];
-                const point& c0 = half0Ctrs[i];
+                const point& c0 = half0Ctrs[from1To0[i]];
                 const point& c1 = half1Ctrs[i];
                 writeOBJ(ccStr, c0, c1, vertI);
             }

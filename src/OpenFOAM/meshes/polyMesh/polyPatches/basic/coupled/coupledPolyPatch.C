@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2010 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2011 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,6 +31,17 @@ License
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(Foam::coupledPolyPatch, 0);
+
+template<>
+const char* Foam::NamedEnum<Foam::coupledPolyPatch::transformType, 3>::names[] =
+{
+    "unknown",
+    "rotational",
+    "translational"
+};
+
+const Foam::NamedEnum<Foam::coupledPolyPatch::transformType, 3>
+    Foam::coupledPolyPatch::transformTypeNames;
 
 Foam::scalar Foam::coupledPolyPatch::matchTol = 1E-3;
 
@@ -258,12 +269,14 @@ void Foam::coupledPolyPatch::calcTransformTensors
     const vectorField& nf,
     const vectorField& nr,
     const scalarField& smallDist,
-    const scalar absTol
+    const scalar absTol,
+    const transformType transform
 ) const
 {
     if (debug)
     {
         Pout<< "coupledPolyPatch::calcTransformTensors : " << name() << endl
+            << "    transform:" << transformTypeNames[transform] << nl
             << "    (half)size:" << Cf.size() << nl
             << "    absTol:" << absTol << nl
             //<< "    smallDist:" << smallDist << nl
@@ -294,9 +307,16 @@ void Foam::coupledPolyPatch::calcTransformTensors
             Pout<< "    error:" << error << endl;
         }
 
-        if (sum(mag(nf & nr)) < Cf.size()-error)
+        if
+        (
+            transform == ROTATIONAL
+         || (
+                transform != TRANSLATIONAL
+             && (sum(mag(nf & nr)) < Cf.size()-error)
+            )
+        )
         {
-            // Rotation, no separation
+            // Type is rotation or unknown and normals not aligned
 
             separation_.setSize(0);
 
@@ -331,10 +351,12 @@ void Foam::coupledPolyPatch::calcTransformTensors
         }
         else
         {
+            // Translational or unknown and normals aligned.
+
             forwardT_.setSize(0);
             reverseT_.setSize(0);
 
-            separation_ = (nf&(Cr - Cf))*nf;
+            separation_ = Cr - Cf;
 
             // Three situations:
             // - separation is zero. No separation.
