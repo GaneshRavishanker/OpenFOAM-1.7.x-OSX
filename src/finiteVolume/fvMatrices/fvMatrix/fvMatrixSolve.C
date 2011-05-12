@@ -175,7 +175,7 @@ Foam::fvMatrix<Type>::solver()
 template<class Type>
 Foam::lduMatrix::solverPerformance Foam::fvMatrix<Type>::fvSolver::solve()
 {
-    return solve(psi_.mesh().solverDict(psi_.name()));
+    return solve(fvMat_.psi_.mesh().solverDict(fvMat_.psi_.name()));
 }
 
 
