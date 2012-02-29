@@ -63,10 +63,13 @@ filename extensions, so please enable the setting
 instructions in it. If you downloaded everything to '~/OpenFOAM/images', no
 changes need be made.
 
-- Type the following into 'Terminal.app':
+- Type the following commands into 'Terminal.app':
 +
 ------------------
 test -f ~/.bash_profile && cp ~/.bash_profile ~/.bash_profile.bak_setup_foam_$(date '+%Y%m%d%H%M%S')
+------------------
++
+------------------
 echo ". ~/OpenFOAM/images/setup_foam.sh" >> ~/.bash_profile
 ------------------
 +
